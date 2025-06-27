@@ -71,7 +71,47 @@
   - IQueryable<string> 장점을 이용하지 못함
  
   ### IEnumerable<T> & IQueryable<T>의 개념
-   - LINQ-to-Object
-     - ㅁㄴㅇㄹ
-   - LINQ-to-SQL
-     - asdf
+   - #### LINQ-to-Object
+     - LINQ 쿼리를 메모리에서 로컬로 실행
+     - 쿼리는 DB에 모든 데이터를 가져와 메모리에서 필터 및 정렬 수행
+   - #### LINQ-to-SQL
+     - LINQ 쿼리를 DB에서 모든걸 수행하도록 SQL 쿼리로 변환
+     - IQueryable<T>는 IEnumrable<T>를 상속받음
+
+  <br>
+    
+  | 구분 | LINQ to Objects | LINQ to SQL |
+  | --- | --- | --- |
+  | 작동 위치 | 로컬 메모리 (RAM) | 원격 DB (SQL Server 등) |
+  | 데이터 소스 |	배열, List<T>, Dictionary 등 |	데이터베이스 (EF, SQL Server 등)
+  | 처리 방식 | .NET이 메모리 내에서 직접 연산 | 쿼리를 SQL로 번역해서 DB에 위임 |
+  | 성능 특징 | 작은 데이터엔 빠름	| 대용량에 최적화 (서버가 처리) |
+  | 대표 인터페이스 | IEnumerable<T> | IQueryable<T> |
+  
+  ![image](https://github.com/user-attachments/assets/6e5701d9-5f09-4299-ba02-e8aef02c6833)
+
+   <br>
+
+   #### var을 사용하지 않았기 때문에...
+   ```csharp
+     IEnumerable<string> q =
+       from c in db.Customers
+       select c.ContactName;
+
+      var q2 = q.Where(s => s.StartWith(start));
+   ```
+   - **var**이 아닌 명시적 타입으로 선언하여 모든 DB에서 필터링되지 않은 연락처와 이름을 로컬에 읽어온다.
+   - **Where** 두 번쨰 쿼리문 또한 로컬 메모리에서 필터링이 진행된다.
+
+   #### var을 사용했기 떄문에...
+
+    ```csharp
+        var q =
+       from c in db.Customers
+       select c.ContactName;
+
+      var q2 = q.Where(s => s.StartWith(start));
+    ```
+     - **var**을 이용해 런타임에서 IQueryable<string>으로 자동으로 변환
+     - ___ **첫 번째**___  쿼리가 실행되면서 DB에 SQL이 전달되지 않고 ___ **두 번째**___ 쿼리까지 조합하여 전달된다. ___(지연실행(Lazy execution))___
+     - 조합된 쿼리가 DB에 SQL로 전달되어 필터링된 데이터를 얻는다. 
