@@ -51,3 +51,27 @@
  - 형변환 기능때문에 정밀도가 달라짐 (값이 손실됨)
  - 숫자 타입과 **var**를 함께 사용하면 ***가독성*** 문제가 아닌 정확한 값에 문제가 될 수 있다.
 > 숫자 타입은 **var** 보다는 **명시적**으로 타입을 선언하고 사용하자
+
+## **var**를 사용하지 않고 사용자가 명시적으로 타입을 어설프게 사용하면 성능 문제를 유발한다.
+- DB에서 특정 문자열로 시작하는 고객의 이름을 검색하는 예시
+  ```csharp
+   public IEnumerable<string> FindCustomers(string str)
+  {
+    IEnumerable<string> q =
+       from c in db.Customers
+       select c.ContactName;
+
+     var q2 = q.Where(s => s.StartWith(start));
+      return q2;
+  }
+  ```
+  - 해당 코드는 매우 심각한 성능 문제를 유발한다.
+  - DB 쿼리가 수행되는 경우 LINQ 쿼리를 실제로 IQueryable<string> 타입을 반환한다.
+  - 하지만 *q* 쿼리를 개발자가 IEnumerable<string> 타입을 명시적으로 할당함
+  - IQueryable<string> 장점을 이용하지 못함
+ 
+  ### IEnumerable<T> & IQueryable<T>의 개념
+   - LINQ-to-Object
+     - ㅁㄴㅇㄹ
+   - LINQ-to-SQL
+     - asdf
